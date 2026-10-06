@@ -2,6 +2,7 @@ import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import helmet from 'helmet';
+import { json } from 'express';
 import cookieParser from 'cookie-parser';
 
 async function bootstrap() {
@@ -26,6 +27,9 @@ async function bootstrap() {
   }));
   
   app.use(cookieParser());
+
+  // Giới hạn kích thước body để chống DoS (import bulk tối đa 2000 dòng)
+  app.use(json({ limit: '5mb' }));
   
   app.useGlobalPipes(new ValidationPipe({
     whitelist: true,

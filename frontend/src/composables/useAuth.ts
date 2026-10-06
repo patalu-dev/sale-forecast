@@ -84,14 +84,30 @@ export function useAuth() {
 
       setAuth(data.user)
 
-      // Xử lý chuyển hướng sau khi đăng nhập thành công
-      let target = redirectPath || (router.currentRoute.value.query.redirect as string) || '/dashboard'
-      
-      // Nếu target vẫn là trang login hoặc trang chủ thì mặc định về dashboard
-      if (target === '/' || target === '/login' || target.startsWith('/?')) {
-        target = '/dashboard'
+      // Xử lý chuyển hướng sau khi đăng nhập thành công:
+      // ưu tiên redirect nếu có quyền, ngược lại vào trang đầu tiên được phép
+      const routePerms: Record<string, { action: string; subject: string }> = {
+        '/forecast': { action: 'view', subject: 'Forecast' },
+        '/dashboard': { action: 'view', subject: 'Forecast' },
+        '/targets': { action: 'view', subject: 'Target' },
+        '/summary': { action: 'view', subject: 'Summary' },
+        '/reports': { action: 'view', subject: 'Report' },
+        '/users': { action: 'view', subject: 'User' },
+        '/roles': { action: 'view', subject: 'Role' },
+        '/permissions': { action: 'view', subject: 'Permission' },
       }
-      
+      const firstAllowed =
+        ['/forecast', '/summary', '/reports', '/targets'].find((p) => {
+          const m = routePerms[p]
+          return can(m.action, m.subject)
+        }) || '/forecast'
+
+      let target = redirectPath || (router.currentRoute.value.query.redirect as string) || ''
+      const perm = routePerms[target]
+      if (!target || target === '/' || target === '/login' || target.startsWith('/?') || (perm && !can(perm.action, perm.subject))) {
+        target = firstAllowed
+      }
+
       router.push(target)
       
       return true

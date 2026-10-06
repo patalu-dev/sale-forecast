@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { SidebarProps } from '@/components/ui/sidebar'
-import { SquareTerminal, LayoutDashboard } from "lucide-vue-next"
+import { SquareTerminal, TrendingUp, Target, BarChart3, FileBarChart } from "lucide-vue-next"
 import NavMain from '@/components/NavMain.vue'
 import NavUser from '@/components/NavUser.vue'
 import {
@@ -42,11 +42,38 @@ const data = computed(() => {
 
   const navMain = []
 
-  navMain.push({
-    title: "Dashboard",
-    url: "/dashboard",
-    icon: LayoutDashboard,
-  })
+  const menus = [
+    {
+      title: "Forecast",
+      url: "/forecast",
+      icon: TrendingUp,
+      action: "view",
+      subject: "Forecast",
+    },
+    {
+      title: "Summary",
+      url: "/summary",
+      icon: BarChart3,
+      action: "view",
+      subject: "Summary",
+    },
+    {
+      title: "Reports",
+      url: "/reports",
+      icon: FileBarChart,
+      action: "view",
+      subject: "Report",
+    },
+    {
+      title: "Targets",
+      url: "/targets",
+      icon: Target,
+      action: "view",
+      subject: "Target",
+    },
+  ].filter(item => can(item.action, item.subject))
+
+  navMain.push(...menus)
 
   // if (can('view', 'Dashboard')) {
   // }

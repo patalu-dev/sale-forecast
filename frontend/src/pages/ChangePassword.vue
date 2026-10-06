@@ -45,9 +45,9 @@ const submit = async () => {
         return
     }
 
-    if (newPassword.value.length < 6) {
+    if (newPassword.value.length < 8) {
         toast('Lỗi', {
-            description: 'Mật khẩu mới phải có ít nhất 6 ký tự',
+            description: 'Mật khẩu mới phải có ít nhất 8 ký tự',
             icon: h(XCircle, { class: 'text-red-500 w-5 h-5' }),
             position: 'top-center',
         })

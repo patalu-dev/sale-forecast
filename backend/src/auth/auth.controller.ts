@@ -2,6 +2,7 @@ import { Controller, Post, Body, Get, UseGuards, Request, Res, Req } from '@nest
 import { Throttle } from '@nestjs/throttler';
 import type { Response } from 'express';
 import { AuthService } from './auth.service';
+import { ChangePasswordDto } from './dto/change-password.dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
 
 @Controller('auth')
@@ -17,14 +18,14 @@ export class AuthController {
     // Set httpOnly cookies
     res.cookie('access_token', tokens.access_token, {
       httpOnly: true,
-      secure: false, // Set to false for development
+      secure: process.env.NODE_ENV === 'production', // Send cookie over HTTPS only in production
       sameSite: 'lax', // Changed to lax for better compatibility
       maxAge: 15 * 60 * 1000, // 15 minutes
     });
 
     res.cookie('refresh_token', tokens.refresh_token, {
       httpOnly: true,
-      secure: false, // Set to false for development
+      secure: process.env.NODE_ENV === 'production', // Send cookie over HTTPS only in production
       sameSite: 'lax', // Changed to lax for better compatibility
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
@@ -40,7 +41,7 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Post('change-password')
-  async changePassword(@Request() req, @Body() body: any) {
+  async changePassword(@Request() req, @Body() body: ChangePasswordDto) {
     return this.authService.changePassword(req.user.id, body.currentPassword, body.newPassword);
   }
 
@@ -54,14 +55,14 @@ export class AuthController {
     // Update httpOnly cookies
     res.cookie('access_token', tokens.access_token, {
       httpOnly: true,
-      secure: false, // Set to false for development
+      secure: process.env.NODE_ENV === 'production', // Send cookie over HTTPS only in production
       sameSite: 'lax', // Changed to lax for better compatibility
       maxAge: 15 * 60 * 1000, // 15 minutes
     });
 
     res.cookie('refresh_token', tokens.refresh_token, {
       httpOnly: true,
-      secure: false, // Set to false for development
+      secure: process.env.NODE_ENV === 'production', // Send cookie over HTTPS only in production
       sameSite: 'lax', // Changed to lax for better compatibility
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
@@ -74,27 +75,12 @@ export class AuthController {
   async logout(@Request() req, @Res({ passthrough: true }) res: Response) {
     await this.authService.logout(req.user.id);
 
-    // Clear cookies
-    res.clearCookie('access_token');
-    res.clearCookie('refresh_token');
+    // Clear cookies (options must match the ones used when setting)
+    const clearOpts = { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax' as const };
+    res.clearCookie('access_token', clearOpts);
+    res.clearCookie('refresh_token', clearOpts);
 
     return { message: 'Logged out successfully' };
   }
 
-  @UseGuards(JwtAuthGuard)
-  @Get('debug')
-  async debugToken(@Request() req) {
-    const token = req.cookies.access_token || req.headers.authorization?.split(' ')[1];
-    if (!token) {
-      return { error: 'No token found' };
-    }
-    const decoded = this.authService.decodeToken(token);
-    const now = Math.floor(Date.now() / 1000);
-    return {
-      payload: decoded,
-      serverTime: now,
-      expiresInSeconds: decoded.exp - now,
-      totalLifeTimeSeconds: decoded.exp - decoded.iat
-    };
-  }
 }

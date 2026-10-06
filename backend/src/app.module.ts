@@ -7,11 +7,16 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { User } from './users/entities/user.entity';
 import { Role } from './roles/entities/role.entity';
 import { Permission } from './permissions/entities/permission.entity';
+import { Forecast } from './forecasts/entities/forecast.entity';
+import { Target } from './targets/entities/target.entity';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { RolesModule } from './roles/roles.module';
 import { PermissionsModule } from './permissions/permissions.module';
 import { AbilityModule } from './ability/ability.module';
+import { ForecastsModule } from './forecasts/forecasts.module';
+import { TargetsModule } from './targets/targets.module';
+import { SummariesModule } from './summaries/summaries.module';
 
 @Module({
   imports: [
@@ -43,7 +48,7 @@ import { AbilityModule } from './ability/ability.module';
           username: dbUsername,
           password: dbPassword,
           database: dbDatabase,
-          entities: [User, Role, Permission],
+          entities: [User, Role, Permission, Forecast, Target],
           synchronize: true,
         };
       },
@@ -53,6 +58,9 @@ import { AbilityModule } from './ability/ability.module';
     UsersModule,
     RolesModule,
     PermissionsModule,
+    ForecastsModule,
+    TargetsModule,
+    SummariesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

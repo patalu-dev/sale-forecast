@@ -204,6 +204,7 @@ const handleExport = async () => {
                             <th class="px-4 py-1 border-b whitespace-nowrap">Họ tên</th>
                             <th class="px-4 py-1 border-b whitespace-nowrap">Tài khoản</th>
                             <th class="px-4 py-1 border-b whitespace-nowrap">Email</th>
+                            <th class="px-4 py-1 border-b whitespace-nowrap">Group</th>
                             <th class="px-4 py-1 border-b whitespace-nowrap">Quyền hạn</th>
                             <th v-if="!showDeleted" class="px-4 py-1 border-b whitespace-nowrap">Trạng thái</th>
                             <th class="px-4 py-1 border-b whitespace-nowrap">Hành động</th>
@@ -211,7 +212,7 @@ const handleExport = async () => {
                     </thead>
                     <tbody class="divide-y divide-gray-200">
                         <tr v-if="loading">
-                            <td :colspan="showDeleted ? 6 : 7" class="px-4 py-10 text-center">
+                            <td :colspan="showDeleted ? 7 : 8" class="px-4 py-10 text-center">
                                 <div class="flex flex-col items-center justify-center gap-3">
                                     <Spinner class="w-6 h-6 text-gray-400" />
                                     <span class="text-sm text-gray-400">Đang tải dữ liệu...</span>
@@ -219,7 +220,7 @@ const handleExport = async () => {
                             </td>
                         </tr>
                         <tr v-else-if="!loading && users.length === 0">
-                            <td :colspan="showDeleted ? 6 : 7" class="px-4 py-12 text-center text-gray-500">
+                            <td :colspan="showDeleted ? 7 : 8" class="px-4 py-12 text-center text-gray-500">
                                 <div class="flex flex-col items-center justify-center">
                                     <Inbox class="w-12 h-12 text-gray-300 mb-4" />
                                     <p class="text-base text-gray-400">Không có dữ liệu để hiển thị</p>
@@ -235,6 +236,11 @@ const handleExport = async () => {
                             <td class="px-4 py-0.5 whitespace-nowrap">{{ user.name }}</td>
                             <td class="px-4 py-0.5 whitespace-nowrap">{{ user.username }}</td>
                             <td class="px-4 py-0.5 whitespace-nowrap">{{ user.email }}</td>
+                            <td class="px-4 py-0.5 whitespace-nowrap">
+                                <span :class="user.group === 'export' ? 'text-blue-600' : 'text-slate-700'" class="text-xs font-medium">
+                                    {{ user.group || 'local' }}
+                                </span>
+                            </td>
                             <td class="px-4 py-0.5 whitespace-nowrap">
                                 <div class="flex flex-wrap gap-1" v-if="user.roles && user.roles.length > 0">
                                     <Badge v-for="role in user.roles" :key="role.id" variant="secondary">

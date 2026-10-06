@@ -23,6 +23,7 @@ const name = ref('')
 const username = ref('')
 const email = ref('')
 const roleIds = ref<number[]>([])
+const group = ref('local')
 const roles = ref<any[]>([])
 const loading = ref(false)
 const showLoading = ref(false)
@@ -94,6 +95,7 @@ const handleSubmit = async () => {
                 email: email.value || null,
                 password: '123456',
                 isActive: true,
+                group: group.value,
                 roleIds: roleIds.value
             }),
         })
@@ -107,6 +109,7 @@ const handleSubmit = async () => {
         name.value = ''
         username.value = ''
         email.value = ''
+        group.value = 'local'
 
         // Close dialog
         isOpen.value = false
@@ -165,6 +168,18 @@ const handleSubmit = async () => {
                     <Label for="email_create" class="text-gray-800">Email</Label>
                     <Input id="email_create" v-model="email" type="email" placeholder="Nhập email"
                         :disabled="loading" />
+                </div>
+                <div class="grid gap-2">
+                    <Label for="group_create" class="text-gray-800">Group</Label>
+                    <Select v-model="group">
+                        <SelectTrigger id="group_create" class="w-full">
+                            <SelectValue placeholder="Chọn group" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="local">Local</SelectItem>
+                            <SelectItem value="export">Export</SelectItem>
+                        </SelectContent>
+                    </Select>
                 </div>
                 <div class="grid gap-2 mb-2">
                     <Label for="role_create" class="text-gray-800">Quyền hạn <span class="text-red-500">*</span></Label>

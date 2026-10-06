@@ -4,6 +4,8 @@ import * as bcrypt from 'bcrypt';
 import { Permission } from '../permissions/entities/permission.entity';
 import { Role } from '../roles/entities/role.entity';
 import { User } from '../users/entities/user.entity';
+import { Forecast } from '../forecasts/entities/forecast.entity';
+import { Target } from '../targets/entities/target.entity';
 
 /**
  * Seed dữ liệu khớp với trạng thái hiện tại của Database
@@ -17,7 +19,7 @@ const dataSource = new DataSource({
   username: process.env.DB_USERNAME || 'root',
   password: process.env.DB_PASSWORD || '',
   database: process.env.DB_DATABASE || 'nest_vue_with_auth',
-  entities: [Permission, Role, User],
+  entities: [Permission, Role, User, Forecast, Target],
   synchronize: true,
 });
 
@@ -34,7 +36,10 @@ async function seed() {
   // =============================================
   console.log('━━━ BƯỚC 1: Cập nhật Permissions ━━━');
 
-  const defaultPermissions = [
+  const OWN_COND: Record<string, any> = { created_by: '${user.username}' };
+
+  type SeedPerm = { name: string; action: string; subject: string; description: string; inverted: boolean; conditions?: Record<string, any> };
+  const defaultPermissions: SeedPerm[] = [
     { name: 'Toàn quyền', action: 'manage', subject: 'all', description: 'Toàn quyền quản lý hệ thống', inverted: false },
     { name: 'Xem tất cả', action: 'read', subject: 'all', description: 'Xem tất cả thông tin', inverted: false },
     { name: 'Xem menu người dùng', action: 'view', subject: 'User', description: 'Xem menu User', inverted: false },
@@ -54,16 +59,35 @@ async function seed() {
     { name: 'Xóa quyền', action: 'delete', subject: 'Permission', description: 'Xóa quyền', inverted: false },
     { name: 'Ngăn truy cập Roles', action: 'create,update,delete,view', subject: 'Role', description: 'Ngăn truy cập Roles', inverted: true },
     { name: 'Ngăn truy cập Permissions', action: 'create,update,view,delete', subject: 'Permission', description: 'Ngăn truy cập Permissions', inverted: true },
+    // Menu báo cáo bán hàng
+    { name: 'Xem menu Forecast', action: 'view', subject: 'Forecast', description: 'Hiển thị menu Forecast', inverted: false },
+    { name: 'Xem menu Summary', action: 'view', subject: 'Summary', description: 'Hiển thị menu Summary', inverted: false },
+    { name: 'Xem menu Reports', action: 'view', subject: 'Report', description: 'Hiển thị menu Reports', inverted: false },
+    { name: 'Xem menu Targets', action: 'view', subject: 'Target', description: 'Hiển thị menu Targets', inverted: false },
+    // Forecast của chính mình
+    { name: 'Tạo forecast của mình', action: 'create', subject: 'Forecast', description: 'Tạo forecast (created_by = chính mình)', inverted: false, conditions: OWN_COND },
+    { name: 'Xem forecast của mình', action: 'read', subject: 'Forecast', description: 'Xem forecast của chính mình', inverted: false, conditions: OWN_COND },
+    { name: 'Sửa forecast của mình', action: 'update', subject: 'Forecast', description: 'Sửa forecast của chính mình', inverted: false, conditions: OWN_COND },
+    { name: 'Xóa forecast của mình', action: 'delete', subject: 'Forecast', description: 'Xóa forecast của chính mình', inverted: false, conditions: OWN_COND },
+    // Target của chính mình
+    { name: 'Tạo target của mình', action: 'create', subject: 'Target', description: 'Tạo target (created_by = chính mình)', inverted: false, conditions: OWN_COND },
+    { name: 'Xem target của mình', action: 'read', subject: 'Target', description: 'Xem target của chính mình', inverted: false, conditions: OWN_COND },
+    { name: 'Sửa target của mình', action: 'update', subject: 'Target', description: 'Sửa target của chính mình', inverted: false, conditions: OWN_COND },
+    { name: 'Xóa target của mình', action: 'delete', subject: 'Target', description: 'Xóa target của chính mình', inverted: false, conditions: OWN_COND },
   ];
 
+  const condKey = (c: any) => (c ? JSON.stringify(c) : null);
   const savedPermissions: Permission[] = [];
   for (const perm of defaultPermissions) {
-    let existing = await permissionRepo.findOneBy({ action: perm.action, subject: perm.subject, inverted: perm.inverted });
-    if (!existing) {
-      existing = await permissionRepo.save(permissionRepo.create(perm));
+    const candidates = await permissionRepo.findBy({ action: perm.action, subject: perm.subject, inverted: perm.inverted });
+    const found = candidates.find(p => condKey(p.conditions) === condKey(perm.conditions ?? null));
+    if (found) {
+      savedPermissions.push(found);
+    } else {
+      const created = await permissionRepo.save(permissionRepo.create(perm));
       console.log(`  ✅ Tạo: ${perm.action}:${perm.subject}`);
+      savedPermissions.push(created);
     }
-    savedPermissions.push(existing);
   }
 
   // =============================================
@@ -87,9 +111,51 @@ async function seed() {
       ]
     },
     {
+      name: 'staff',
+      description: 'Nhân viên',
+      perms: [
+        { a: 'view', s: 'Forecast', i: false },
+        { a: 'view', s: 'Summary', i: false },
+        { a: 'view', s: 'Report', i: false },
+        { a: 'view', s: 'Target', i: false },
+        { a: 'create', s: 'Forecast', i: false, c: OWN_COND },
+        { a: 'read', s: 'Forecast', i: false, c: OWN_COND },
+        { a: 'update', s: 'Forecast', i: false, c: OWN_COND },
+        { a: 'delete', s: 'Forecast', i: false, c: OWN_COND },
+        { a: 'create', s: 'Target', i: false, c: OWN_COND },
+        { a: 'read', s: 'Target', i: false, c: OWN_COND },
+        { a: 'update', s: 'Target', i: false, c: OWN_COND },
+        { a: 'delete', s: 'Target', i: false, c: OWN_COND },
+        { a: 'read', s: 'User', i: false },
+      ]
+    },
+    {
+      name: 'manager',
+      description: 'Quản lý',
+      perms: [
+        { a: 'view', s: 'Summary', i: false },
+        { a: 'view', s: 'Report', i: false },
+        { a: 'read', s: 'User', i: false },
+      ]
+    },
+    {
       name: 'user',
       description: 'Người dùng thông thường',
-      perms: []
+      perms: [
+        { a: 'view', s: 'Forecast', i: false },
+        { a: 'view', s: 'Summary', i: false },
+        { a: 'view', s: 'Report', i: false },
+        { a: 'view', s: 'Target', i: false },
+        { a: 'create', s: 'Forecast', i: false, c: OWN_COND },
+        { a: 'read', s: 'Forecast', i: false, c: OWN_COND },
+        { a: 'update', s: 'Forecast', i: false, c: OWN_COND },
+        { a: 'delete', s: 'Forecast', i: false, c: OWN_COND },
+        { a: 'create', s: 'Target', i: false, c: OWN_COND },
+        { a: 'read', s: 'Target', i: false, c: OWN_COND },
+        { a: 'update', s: 'Target', i: false, c: OWN_COND },
+        { a: 'delete', s: 'Target', i: false, c: OWN_COND },
+        { a: 'read', s: 'User', i: false },
+      ]
     }
   ];
 
@@ -99,17 +165,17 @@ async function seed() {
     if (!role) {
       role = roleRepo.create({ name: rData.name, description: rData.description });
     }
-    
-    // Tìm các permission object tương ứng
+
+    // Tìm các permission object tương ứng (khớp cả conditions)
     const rolePerms: Permission[] = [];
     for (const p of rData.perms) {
-      const found = savedPermissions.find(sp => sp.action === p.a && sp.subject === p.s && sp.inverted === p.i);
+      const found = savedPermissions.find(sp => sp.action === p.a && sp.subject === p.s && sp.inverted === p.i && condKey(sp.conditions) === condKey((p as any).c ?? null));
       if (found) rolePerms.push(found);
     }
-    
+
     role.permissions = rolePerms;
     savedRoles[rData.name] = await roleRepo.save(role);
-    console.log(`  ✅ Role "${rData.name}" updated.`);
+    console.log(`  ✅ Role "${rData.name}" updated (${rolePerms.length} perms).`);
   }
 
   // =============================================
@@ -134,7 +200,7 @@ async function seed() {
         isActive: true,
       });
     }
-    
+
     user.roles = uData.roles.map(rName => savedRoles[rName]);
     await userRepo.save(user);
     console.log(`  ✅ User "${uData.username}" updated.`);

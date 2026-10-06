@@ -1,6 +1,7 @@
-import { IsString, IsEmail, IsBoolean, MaxLength, IsOptional, IsNumber, IsArray } from 'class-validator';
+import { IsString, IsEmail, IsBoolean, MaxLength, IsOptional, IsNumber, IsArray, IsEnum } from 'class-validator';
 import { Transform } from 'class-transformer';
 import { sanitizeInput } from '../../utils/sanitize';
+import { UserGroup } from '../entities/user.entity';
 
 export class CreateUserDto {
     @IsString({
@@ -36,6 +37,10 @@ export class CreateUserDto {
 
     @IsBoolean()
     isActive: boolean;
+
+    @IsEnum(UserGroup, { message: 'Group phải là local hoặc export' })
+    @IsOptional()
+    group?: UserGroup;
 
     @IsArray()
     @IsNumber({}, { each: true })

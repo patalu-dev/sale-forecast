@@ -28,6 +28,7 @@ const emit = defineEmits(['success'])
 
 const name = ref('')
 const email = ref('')
+const group = ref('local')
 const roleIds = ref<number[]>([])
 const roles = ref<any[]>([])
 const loading = ref(false)
@@ -57,6 +58,7 @@ watch(() => isOpen.value, (val) => {
     if (val) {
         name.value = props.user.name
         email.value = props.user.email || ''
+        group.value = props.user.group || 'local'
         roleIds.value = props.user.roles?.map((r: any) => r.id) || []
         
         if (roles.value.length === 0) {
@@ -96,6 +98,7 @@ const handleSubmit = async () => {
             body: JSON.stringify({
                 name: name.value,
                 email: email.value || null,
+                group: group.value,
                 roleIds: roleIds.value,
             }),
         })
@@ -154,6 +157,18 @@ const handleSubmit = async () => {
                 <div class="grid gap-2">
                     <Label for="email_edit" class="text-gray-800">Email</Label>
                     <Input id="email_edit" v-model="email" type="email" placeholder="Nhập email" :disabled="loading" />
+                </div>
+                <div class="grid gap-2">
+                    <Label for="group_edit" class="text-gray-800">Group</Label>
+                    <Select v-model="group">
+                        <SelectTrigger id="group_edit" class="w-full">
+                            <SelectValue placeholder="Chọn group" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="local">Local</SelectItem>
+                            <SelectItem value="export">Export</SelectItem>
+                        </SelectContent>
+                    </Select>
                 </div>
                 <div class="grid gap-2 mb-2">
                     <Label for="role_edit" class="text-gray-800">Quyền hạn <span class="text-red-500">*</span></Label>

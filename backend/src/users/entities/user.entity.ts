@@ -14,6 +14,11 @@ import {
 import { Exclude } from 'class-transformer';
 import { Role } from '../../roles/entities/role.entity';
 
+export enum UserGroup {
+  LOCAL = 'local',
+  EXPORT = 'export',
+}
+
 @Entity('users')
 @Unique(['username', 'deletedAt'])
 @Unique(['email', 'deletedAt'])
@@ -36,6 +41,9 @@ export class User {
 
   @Column({ default: true })
   isActive: boolean;
+
+  @Column({ type: 'enum', enum: UserGroup, default: UserGroup.LOCAL })
+  group: UserGroup;
 
   @ManyToMany(() => Role, { eager: false })
   @JoinTable({

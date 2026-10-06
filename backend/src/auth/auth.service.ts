@@ -1,5 +1,6 @@
-import { Injectable, UnauthorizedException, ForbiddenException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
+import { TargetsService } from '../targets/targets.service';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
@@ -8,6 +9,7 @@ import * as bcrypt from 'bcrypt';
 export class AuthService {
   constructor(
     private usersService: UsersService,
+    private targetsService: TargetsService,
     private jwtService: JwtService,
     private configService: ConfigService,
   ) {}
@@ -77,12 +79,23 @@ export class AuthService {
     const tokens = await this.getTokens(user.id, user.username, roleIds);
     await this.updateRefreshTokenHash(user.id, tokens.refresh_token);
 
+    // Chỉ tự thêm target tháng mới cho nhân viên (role staff)
+    const isStaff = user.roles?.some((r: any) => r.name === 'staff');
+    if (isStaff) {
+      try {
+        await this.targetsService.ensureTargetForCurrentCycle(user.username);
+      } catch (e: any) {
+        console.warn('[Auth] ensure target failed:', e?.message);
+      }
+    }
+
     return {
       ...tokens,
       user: {
         id: user.id,
         username: user.username,
         name: user.name,
+        group: user.group,
         roles: user.roles
           ? user.roles.map((r: any) => ({
               id: r.id,
@@ -156,6 +169,10 @@ export class AuthService {
     const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.password);
     if (!isCurrentPasswordValid) {
       throw new UnauthorizedException('Mật khẩu hiện tại không chính xác');
+    }
+
+    if (currentPassword === newPassword) {
+      throw new BadRequestException('Mật khẩu mới phải khác mật khẩu hiện tại');
     }
 
     return this.usersService.update(userId, { password: newPassword });
