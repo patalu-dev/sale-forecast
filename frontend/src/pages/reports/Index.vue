@@ -68,7 +68,7 @@ const summary = ref<any>({
 const selectedUserLabel = computed(() => {
   const u = users.value.find((x) => x.username === searchUser.value)
   if (!u) return searchUser.value || '-'
-  return u.name ? `${u.username} - ${u.name}` : u.username
+  return u.name ? `${u.username}` : u.username
 })
 
 const fetchUsers = async () => {
