@@ -54,6 +54,15 @@ const forecastMain = ref<any[]>([])
 const forecastException = ref<any[]>([])
 const noForecast = ref<any[]>([])
 
+const searchGroup = ref('')
+const groupForecastMain = ref<any[]>([])
+const groupForecastException = ref<any[]>([])
+const groupNoForecast = ref<any[]>([])
+
+const allForecastMain = ref<any[]>([])
+const allForecastException = ref<any[]>([])
+const allNoForecast = ref<any[]>([])
+
 const summary = ref<any>({
   totalMain: 0,
   totalException: 0,
@@ -102,6 +111,47 @@ const fetchReport = async () => {
     forecastException.value = data.forecastException || []
     noForecast.value = data.noForecast || []
     summary.value = data.summary || {}
+
+    // Group của nhân viên được chọn + toàn phòng (P.KD)
+    const picked = users.value.find((x) => x.username === searchUser.value)
+    searchGroup.value = picked?.group || ''
+    groupForecastMain.value = []
+    groupForecastException.value = []
+    groupNoForecast.value = []
+    allForecastMain.value = []
+    allForecastException.value = []
+    allNoForecast.value = []
+
+    const extra: Promise<void>[] = []
+    if (searchGroup.value) {
+      const gq = new URLSearchParams()
+      if (searchDate.value) gq.append('selectedDate', searchDate.value)
+      gq.append('group', searchGroup.value)
+      extra.push(
+        request(`/forecasts?${gq.toString()}`).then(async (gRes) => {
+          if (gRes.ok) {
+            const gData = await gRes.json()
+            groupForecastMain.value = gData.forecastMain || []
+            groupForecastException.value = gData.forecastException || []
+            groupNoForecast.value = gData.noForecast || []
+          }
+        }),
+      )
+    }
+    const aq = new URLSearchParams()
+    if (searchDate.value) aq.append('selectedDate', searchDate.value)
+    aq.append('all', 'true')
+    extra.push(
+      request(`/forecasts?${aq.toString()}`).then(async (aRes) => {
+        if (aRes.ok) {
+          const aData = await aRes.json()
+          allForecastMain.value = aData.forecastMain || []
+          allForecastException.value = aData.forecastException || []
+          allNoForecast.value = aData.noForecast || []
+        }
+      }),
+    )
+    await Promise.all(extra)
   } catch (err: any) {
     toast.error('Lỗi khi tải dữ liệu: ' + err.message)
   } finally {
@@ -307,6 +357,28 @@ onMounted(() => {
           :forecast-exception="forecastException" :no-forecast="noForecast" :label="selectedUserLabel" :username="searchUser" />
         <ForecastChart :selected-date="searchDate" :cycle="cycleInfo" :forecast-main="forecastMain"
           :forecast-exception="forecastException" :no-forecast="noForecast" :username="searchUser" />
+      </div>
+
+      <!-- Group KPI / Tiến độ table + Chart -->
+      <div v-if="searchGroup" class="flex flex-col gap-2">
+        <h3 class="text-sm font-bold text-slate-700">Nhóm {{ searchGroup.toUpperCase() }}</h3>
+        <div class="flex flex-col md:flex-row gap-4">
+          <KpiProgressTable :selected-date="searchDate" :cycle="cycleInfo" :forecast-main="groupForecastMain"
+            :forecast-exception="groupForecastException" :no-forecast="groupNoForecast" :label="searchGroup" :group="searchGroup" />
+          <ForecastChart :selected-date="searchDate" :cycle="cycleInfo" :forecast-main="groupForecastMain"
+            :forecast-exception="groupForecastException" :no-forecast="groupNoForecast" :group="searchGroup" />
+        </div>
+      </div>
+
+      <!-- P.KD KPI / Tiến độ table + Chart -->
+      <div class="flex flex-col gap-2">
+        <h3 class="text-sm font-bold text-slate-700">Phòng kinh doanh (P.KD)</h3>
+        <div class="flex flex-col md:flex-row gap-4">
+          <KpiProgressTable :selected-date="searchDate" :cycle="cycleInfo" :forecast-main="allForecastMain"
+            :forecast-exception="allForecastException" :no-forecast="allNoForecast" label="P.KD" :all="true" />
+          <ForecastChart :selected-date="searchDate" :cycle="cycleInfo" :forecast-main="allForecastMain"
+            :forecast-exception="allForecastException" :no-forecast="allNoForecast" :all="true" />
+        </div>
       </div>
     </template>
   </div>
