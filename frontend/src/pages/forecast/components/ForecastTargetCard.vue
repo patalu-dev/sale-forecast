@@ -65,10 +65,12 @@ const formatNumber = (val: any) => {
 }
 
 const getCycleMonth = (dateStr: string): string => {
-  const parts = dateStr.split('-').map(Number)
+  const parts = (dateStr || '').split('-').map(Number)
+  if (parts.length < 3 || parts.some((n) => !Number.isInteger(n))) return ''
   const year = parts[0]
   const month = parts[1] - 1
   const day = parts[2]
+  if (month < 0 || month > 11 || day < 1 || day > 31) return ''
   let targetMonth = month
   let targetYear = year
   if (day >= 21) {
@@ -84,13 +86,15 @@ const getCycleMonth = (dateStr: string): string => {
 const monthLabel = computed(() => {
   const month = getCycleMonth(resolvedDate.value)
   if (!month) return ''
-  const [year, m] = month.split('-').map(Number)
+  const m = Number(month.split('-')[1])
+  if (!Number.isInteger(m) || m < 1 || m > 12) return ''
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
   return `${months[m - 1]} Forecast`
 })
 
 const fetchTarget = async () => {
   const month = getCycleMonth(resolvedDate.value)
+  if (!month) return
   try {
     const q = new URLSearchParams({ month })
     if (props.username) q.append('username', props.username)

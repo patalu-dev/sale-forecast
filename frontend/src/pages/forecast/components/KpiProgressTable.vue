@@ -154,7 +154,7 @@ const rowPerformance = computed(() => {
         <thead class="bg-slate-50 text-slate-700 font-semibold uppercase tracking-wider">
           <tr>
             <th class="px-3 py-2 border-b whitespace-nowrap min-w-[120px]">{{ displayName }}</th>
-            <th v-for="(c, i) in dateColumns" :key="c.iso"
+            <th v-for="c in dateColumns" :key="c.iso"
               class="px-3 py-2 border-b whitespace-nowrap text-center">{{ c.label }}</th>
           </tr>
         </thead>

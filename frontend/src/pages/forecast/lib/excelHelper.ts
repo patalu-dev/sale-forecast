@@ -1,8 +1,6 @@
 import * as XLSX from 'xlsx';
 import { getSaturdaysInCycle } from '@/lib/date-utils';
 
-const DAY_FIELDS = ['day_1', 'day_2', 'day_3', 'day_4', 'day_5', 'day_6', 'day_7'] as const;
-
 export const FORECAST_COLUMNS = [
   { key: 'yarn_type_1', label: 'Loại sợi 1', example: 'Cotton 32s' },
   { key: 'yarn_type_2', label: 'Loại sợi 2', example: 'Polyester 40s' },
