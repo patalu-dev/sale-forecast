@@ -2,7 +2,7 @@
 import { ref, computed } from 'vue'
 import { Button } from '@/components/ui/button'
 import { Edit2, Trash2, Inbox } from 'lucide-vue-next'
-import { getSaturdaysInCycle } from '@/lib/date-utils'
+import { getCycleDates } from '@/lib/date-utils'
 import EditForecastDialog from './EditForecastDialog.vue'
 import {
   AlertDialog,
@@ -71,7 +71,7 @@ const formatNumber = (val: any) => {
 }
 
 const dayHeaders = computed(() => {
-  const cycleDates = getSaturdaysInCycle(props.selectedDate)
+  const cycleDates = getCycleDates(props.selectedDate)
   return cycleDates.map((cd) => {
     const day = String(cd.date.getDate()).padStart(2, '0')
     const month = String(cd.date.getMonth() + 1).padStart(2, '0')

@@ -68,19 +68,9 @@ const getCycleMonth = (dateStr: string): string => {
   const parts = (dateStr || '').split('-').map(Number)
   if (parts.length < 3 || parts.some((n) => !Number.isInteger(n))) return ''
   const year = parts[0]
-  const month = parts[1] - 1
-  const day = parts[2]
-  if (month < 0 || month > 11 || day < 1 || day > 31) return ''
-  let targetMonth = month
-  let targetYear = year
-  if (day >= 21) {
-    targetMonth = month + 1
-    if (targetMonth > 11) {
-      targetMonth = 0
-      targetYear = year + 1
-    }
-  }
-  return `${targetYear}-${String(targetMonth + 1).padStart(2, '0')}`
+  const month = parts[1]
+  if (month < 1 || month > 12) return ''
+  return `${year}-${String(month).padStart(2, '0')}`
 }
 
 const monthLabel = computed(() => {

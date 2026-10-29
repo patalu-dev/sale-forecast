@@ -7,35 +7,43 @@ describe('ForecastsService - calculateCycleRange', () => {
     service = new ForecastsService({} as any);
   });
 
-  it('should calculate cycle for day < 21 (e.g. 15th Sep): from 21st Aug to 20th Sep', () => {
+  it('should return full calendar month for a mid-month date (15th Sep)', () => {
     const cycle = service.calculateCycleRange('2026-09-15');
-    expect(cycle.startDate).toBe('2026-08-21 00:00:00');
-    expect(cycle.endDate).toBe('2026-09-20 23:59:59');
-    expect(cycle.label).toBe('Kỳ 21/08/2026 - 20/09/2026');
+    expect(cycle.startDate).toBe('2026-09-01 00:00:00');
+    expect(cycle.endDate).toBe('2026-09-30 23:59:59');
+    expect(cycle.label).toBe('Tháng 09/2026');
     expect(cycle.cycleMonth).toBe('2026-09');
   });
 
-  it('should calculate cycle for day >= 21 (e.g. 21st Sep): from 21st Sep to 20th Oct', () => {
-    const cycle = service.calculateCycleRange('2026-09-21');
-    expect(cycle.startDate).toBe('2026-09-21 00:00:00');
-    expect(cycle.endDate).toBe('2026-10-20 23:59:59');
-    expect(cycle.label).toBe('Kỳ 21/09/2026 - 20/10/2026');
-    expect(cycle.cycleMonth).toBe('2026-10');
+  it('should return full calendar month for a month-end date (30th Sep)', () => {
+    const cycle = service.calculateCycleRange('2026-09-30');
+    expect(cycle.startDate).toBe('2026-09-01 00:00:00');
+    expect(cycle.endDate).toBe('2026-09-30 23:59:59');
+    expect(cycle.label).toBe('Tháng 09/2026');
+    expect(cycle.cycleMonth).toBe('2026-09');
   });
 
-  it('should handle January before 21: year rolls back to previous December', () => {
-    const cycle = service.calculateCycleRange('2026-01-10');
-    expect(cycle.startDate).toBe('2025-12-21 00:00:00');
-    expect(cycle.endDate).toBe('2026-01-20 23:59:59');
-    expect(cycle.label).toBe('Kỳ 21/12/2025 - 20/01/2026');
-    expect(cycle.cycleMonth).toBe('2026-01');
+  it('should handle February in a leap year', () => {
+    const cycle = service.calculateCycleRange('2028-02-10');
+    expect(cycle.startDate).toBe('2028-02-01 00:00:00');
+    expect(cycle.endDate).toBe('2028-02-29 23:59:59');
+    expect(cycle.label).toBe('Tháng 02/2028');
+    expect(cycle.cycleMonth).toBe('2028-02');
   });
 
-  it('should handle December after 21: year rolls forward to next January', () => {
+  it('should handle February in a non-leap year', () => {
+    const cycle = service.calculateCycleRange('2026-02-15');
+    expect(cycle.startDate).toBe('2026-02-01 00:00:00');
+    expect(cycle.endDate).toBe('2026-02-28 23:59:59');
+    expect(cycle.label).toBe('Tháng 02/2026');
+    expect(cycle.cycleMonth).toBe('2026-02');
+  });
+
+  it('should handle December (no year rollover)', () => {
     const cycle = service.calculateCycleRange('2026-12-25');
-    expect(cycle.startDate).toBe('2026-12-21 00:00:00');
-    expect(cycle.endDate).toBe('2027-01-20 23:59:59');
-    expect(cycle.label).toBe('Kỳ 21/12/2026 - 20/01/2027');
-    expect(cycle.cycleMonth).toBe('2027-01');
+    expect(cycle.startDate).toBe('2026-12-01 00:00:00');
+    expect(cycle.endDate).toBe('2026-12-31 23:59:59');
+    expect(cycle.label).toBe('Tháng 12/2026');
+    expect(cycle.cycleMonth).toBe('2026-12');
   });
 });

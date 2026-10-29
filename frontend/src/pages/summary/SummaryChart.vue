@@ -12,7 +12,7 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js'
-import { getSaturdaysInCycle, formatDateISO } from '@/lib/date-utils'
+import { getCycleDates, formatDateISO } from '@/lib/date-utils'
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend)
 
@@ -25,7 +25,7 @@ const props = defineProps<{
 
 const items = computed<any[]>(() => props.forecasts || [])
 
-const cycleDates = computed(() => getSaturdaysInCycle(props.selectedDate))
+const cycleDates = computed(() => getCycleDates(props.selectedDate))
 
 const dateColumns = computed(() => {
   return cycleDates.value.map((c) => ({

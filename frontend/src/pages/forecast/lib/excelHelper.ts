@@ -1,5 +1,5 @@
 import * as XLSX from 'xlsx';
-import { getSaturdaysInCycle } from '@/lib/date-utils';
+import { getCycleDates } from '@/lib/date-utils';
 
 export const FORECAST_COLUMNS = [
   { key: 'yarn_type_1', label: 'Loại sợi 1', example: 'Cotton 32s' },
@@ -21,7 +21,7 @@ export const FORECAST_COLUMNS = [
  * Lấy danh sách label cho các cột day_1 - day_7 theo định dạng DD-MM
  */
 export function getDayColumnLabels(selectedDate?: string): string[] {
-  const cycleDates = getSaturdaysInCycle(selectedDate);
+  const cycleDates = getCycleDates(selectedDate);
   return cycleDates.map((cd) => {
     const day = String(cd.date.getDate()).padStart(2, '0');
     const month = String(cd.date.getMonth() + 1).padStart(2, '0');

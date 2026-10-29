@@ -15,7 +15,7 @@ import { Label } from '@/components/ui/label'
 import { Plus, Loader2 } from 'lucide-vue-next'
 import { request } from '@/lib/api'
 import { toast } from 'vue-sonner'
-import { getSaturdaysInCycle, type CycleDate } from '@/lib/date-utils'
+import { getCycleDates, type CycleDate } from '@/lib/date-utils'
 
 const props = defineProps<{
   forecastType: 'forecast_main' | 'forecast_exception' | 'no_forecast'
@@ -51,7 +51,7 @@ const getSelectedMonth = () => {
 }
 
 const cycleDates = computed<CycleDate[]>(() => {
-  return getSaturdaysInCycle(props.defaultDate)
+  return getCycleDates(props.defaultDate)
 })
 
 const formData = reactive({

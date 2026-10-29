@@ -14,7 +14,7 @@ import { Label } from '@/components/ui/label'
 import { Loader2 } from 'lucide-vue-next'
 import { request } from '@/lib/api'
 import { toast } from 'vue-sonner'
-import { getSaturdaysInCycle, type CycleDate } from '@/lib/date-utils'
+import { getCycleDates, type CycleDate } from '@/lib/date-utils'
 
 const props = defineProps<{
   open: boolean
@@ -29,7 +29,7 @@ const emit = defineEmits<{
 const loading = ref(false)
 
 const cycleDates = computed<CycleDate[]>(() => {
-  return getSaturdaysInCycle(props.item?.month ? `${props.item.month}-01` : undefined)
+  return getCycleDates(props.item?.month ? `${props.item.month}-01` : undefined)
 })
 
 const formData = reactive({

@@ -22,9 +22,8 @@ export class ForecastsService {
   ) {}
 
   /**
-   * Tính toán khoảng ngày theo chu kỳ 21:
-   * Nếu ngày < 21: Từ 21 tháng trước đến 20 tháng đang chọn (Kỳ tháng là tháng đang chọn).
-   * Nếu ngày >= 21: Từ 21 tháng đang chọn đến 20 tháng sau (Kỳ tháng là tháng tiếp theo).
+   * Tính toán khoảng ngày theo tháng dương lịch:
+   * Từ ngày 01 đến ngày cuối cùng của tháng được chọn (Kỳ tháng là tháng đang chọn).
    */
   calculateCycleRange(dateStr?: string): CycleRange {
     let now = new Date();
@@ -37,38 +36,15 @@ export class ForecastsService {
 
     const y = now.getFullYear();
     const m = now.getMonth() + 1; // 1-12
-    const d = now.getDate();
+    const lastDay = new Date(y, m, 0).getDate();
+    const mm = String(m).padStart(2, '0');
 
-    let startDateStr = '';
-    let endDateStr = '';
-    let label = '';
-    let cycleMonth = '';
+    const startDateStr = `${y}-${mm}-01 00:00:00`;
+    const endDateStr = `${y}-${mm}-${String(lastDay).padStart(2, '0')} 23:59:59`;
+    const label = `Tháng ${mm}/${y}`;
+    const cycleMonth = `${y}-${mm}`;
 
-    if (d < 21) {
-      let prevYear = y;
-      let prevMonth = m - 1;
-      if (prevMonth === 0) {
-        prevMonth = 12;
-        prevYear = y - 1;
-      }
-      startDateStr = `${prevYear}-${String(prevMonth).padStart(2, '0')}-21 00:00:00`;
-      endDateStr = `${y}-${String(m).padStart(2, '0')}-20 23:59:59`;
-      label = `Kỳ 21/${String(prevMonth).padStart(2, '0')}/${prevYear} - 20/${String(m).padStart(2, '0')}/${y}`;
-      cycleMonth = `${y}-${String(m).padStart(2, '0')}`;
-    } else {
-      let nextYear = y;
-      let nextMonth = m + 1;
-      if (nextMonth === 13) {
-        nextMonth = 1;
-        nextYear = y + 1;
-      }
-      startDateStr = `${y}-${String(m).padStart(2, '0')}-21 00:00:00`;
-      endDateStr = `${nextYear}-${String(nextMonth).padStart(2, '0')}-20 23:59:59`;
-      label = `Kỳ 21/${String(m).padStart(2, '0')}/${y} - 20/${String(nextMonth).padStart(2, '0')}/${nextYear}`;
-      cycleMonth = `${nextYear}-${String(nextMonth).padStart(2, '0')}`;
-    }
-
-    const formattedSelected = `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    const formattedSelected = `${y}-${mm}-${String(now.getDate()).padStart(2, '0')}`;
 
     return {
       startDate: startDateStr,

@@ -179,8 +179,7 @@ const formattedCycleDate = computed(() => {
           <h1 class="text-xl font-bold text-slate-900">Quản lý Dự báo bán hàng</h1>
         </div>
         <p class="text-xs text-slate-500 mt-1">
-          Lọc dữ liệu theo quy tắc chu kỳ ngày 21 (trước 21: từ 21 tháng trước đến 20 tháng này; từ 21: từ 21 tháng này
-          đến 20 tháng sau)
+          Lọc dữ liệu theo tháng dương lịch (từ ngày 01 đến ngày cuối cùng của tháng được chọn)
         </p>
       </div>
 

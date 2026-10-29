@@ -5,13 +5,13 @@ export interface CycleDate {
 }
 
 /**
- * Tính toán khoảng ngày theo chu kỳ 21 và trả về danh sách ngày thứ 7 (Saturday)
- * - Nếu ngày < 21: Từ 21 tháng trước đến 20 tháng đang chọn
- * - Nếu ngày >= 21: Từ 21 tháng đang chọn đến 20 tháng sau
- * Ngày đầu tiên luôn là ngày 21 (dù có phải thứ 7 hay không)
- * Giới hạn tối đa 7 ngày (day_1 đến day_7 trong database)
+ * Tính toán khoảng ngày theo tháng dương lịch và trả về danh sách các mốc cột:
+ * - Luôn bắt đầu từ ngày 01 của tháng
+ * - Các ngày thứ 7 (Saturday) trong tháng
+ * - Luôn kết thúc ở ngày cuối cùng của tháng
+ * Giới hạn tối đa 7 mốc (day_1 đến day_7 trong database)
  */
-export function getSaturdaysInCycle(selectedDate?: string): CycleDate[] {
+export function getCycleDates(selectedDate?: string): CycleDate[] {
   let now = new Date()
   if (selectedDate) {
     const parts = selectedDate.split('-').map(Number)
@@ -22,44 +22,21 @@ export function getSaturdaysInCycle(selectedDate?: string): CycleDate[] {
 
   const y = now.getFullYear()
   const m = now.getMonth() + 1
-  const d = now.getDate()
 
-  let startDate: Date
-  let endDate: Date
-
-  if (d < 21) {
-    // Từ 21 tháng trước đến 20 tháng này
-    let prevYear = y
-    let prevMonth = m - 1
-    if (prevMonth === 0) {
-      prevMonth = 12
-      prevYear = y - 1
-    }
-    startDate = new Date(prevYear, prevMonth - 1, 21)
-    endDate = new Date(y, m - 1, 20)
-  } else {
-    // Từ 21 tháng này đến 20 tháng sau
-    let nextYear = y
-    let nextMonth = m + 1
-    if (nextMonth === 13) {
-      nextMonth = 1
-      nextYear = y + 1
-    }
-    startDate = new Date(y, m - 1, 21)
-    endDate = new Date(nextYear, nextMonth - 1, 20)
-  }
+  const startDate = new Date(y, m - 1, 1)
+  const endDate = new Date(y, m, 0)
 
   const result: CycleDate[] = []
   const MAX_DAYS = 7
 
-  // Luôn thêm ngày 21 làm ngày đầu tiên
+  // Luôn thêm ngày 01 làm ngày đầu tiên
   result.push({
     date: new Date(startDate),
     label: formatCycleDate(startDate),
     isStartDate: true,
   })
 
-  // Tìm các ngày thứ 7 từ startDate + 1 đến endDate (trừ 1 chỗ cho ngày cuối)
+  // Tìm các ngày thứ 7 trong tháng (trừ ngày cuối tháng)
   const current = new Date(startDate)
   current.setDate(current.getDate() + 1)
 
@@ -74,7 +51,7 @@ export function getSaturdaysInCycle(selectedDate?: string): CycleDate[] {
     current.setDate(current.getDate() + 1)
   }
 
-  // Luôn thêm ngày cuối chu kỳ (ngày 20) nếu chưa có
+  // Luôn thêm ngày cuối tháng nếu chưa có
   const lastDate = result[result.length - 1].date
   if (lastDate.getTime() !== endDate.getTime()) {
     result.push({
@@ -105,9 +82,7 @@ export function formatDateISO(date: Date): string {
 }
 
 /**
- * Tính cycleMonth từ ngày chọn (giống chu kỳ 21):
- * - Ngày < 21: cycleMonth là tháng đang chọn (YYYY-MM)
- * - Ngày >= 21: cycleMonth là tháng tiếp theo (YYYY-MM)
+ * Tính cycleMonth từ ngày chọn theo tháng dương lịch (YYYY-MM)
  */
 export function getCycleMonth(dateStr?: string): string {
   let now = new Date()
@@ -119,16 +94,5 @@ export function getCycleMonth(dateStr?: string): string {
   }
   const y = now.getFullYear()
   const m = now.getMonth() + 1
-  const d = now.getDate()
-
-  if (d < 21) {
-    return `${y}-${String(m).padStart(2, '0')}`
-  }
-  let nextYear = y
-  let nextMonth = m + 1
-  if (nextMonth === 13) {
-    nextMonth = 1
-    nextYear = y + 1
-  }
-  return `${nextYear}-${String(nextMonth).padStart(2, '0')}`
+  return `${y}-${String(m).padStart(2, '0')}`
 }

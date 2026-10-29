@@ -12,7 +12,7 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js'
-import { getSaturdaysInCycle, formatDateISO } from '@/lib/date-utils'
+import { getCycleDates, formatDateISO } from '@/lib/date-utils'
 import { request } from '@/lib/api'
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend)
@@ -86,7 +86,7 @@ const dayIndexFor = (iso: string) => {
 }
 
 const dateColumns = computed(() => {
-  return getSaturdaysInCycle(props.selectedDate).map((c) => ({
+  return getCycleDates(props.selectedDate).map((c) => ({
     iso: formatDateISO(c.date),
     label: `${String(c.date.getDate()).padStart(2, '0')}/${String(c.date.getMonth() + 1).padStart(2, '0')}`,
   }))

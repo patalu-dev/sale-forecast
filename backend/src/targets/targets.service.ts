@@ -51,7 +51,7 @@ export class TargetsService {
   }
 
   /**
-   * Đảm bảo user có target cho kỳ tháng hiện tại (chu kỳ 21).
+   * Đảm bảo user có target cho tháng hiện tại (tháng dương lịch).
    * Thêm 1 dòng mới: copy target tháng trước (cùng user) và đổi month sang tháng hiện tại.
    */
   async ensureTargetForCurrentCycle(username: string): Promise<Target | null> {
@@ -82,23 +82,12 @@ export class TargetsService {
   }
 
   /**
-   * Kỳ tháng của ngày hôm nay theo chu kỳ 21:
-   * ngày < 21 => tháng hiện tại; ngày >= 21 => tháng tiếp theo. Format YYYY-MM.
+   * Kỳ tháng của ngày hôm nay theo tháng dương lịch. Format YYYY-MM.
    */
   private getCycleMonth(date: Date = new Date()): string {
     const y = date.getFullYear();
     const m = date.getMonth() + 1;
-    const d = date.getDate();
-    if (d < 21) {
-      return `${y}-${String(m).padStart(2, '0')}`;
-    }
-    let nextYear = y;
-    let nextMonth = m + 1;
-    if (nextMonth === 13) {
-      nextMonth = 1;
-      nextYear = y + 1;
-    }
-    return `${nextYear}-${String(nextMonth).padStart(2, '0')}`;
+    return `${y}-${String(m).padStart(2, '0')}`;
   }
 
   private previousMonth(month: string): string {

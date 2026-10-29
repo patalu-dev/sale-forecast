@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { getSaturdaysInCycle, formatDateISO } from '@/lib/date-utils'
+import { getCycleDates, formatDateISO } from '@/lib/date-utils'
 
 const props = defineProps<{
   selectedDate?: string
@@ -14,7 +14,7 @@ const fmt = (val: any) => {
 }
 
 const dateColumns = computed(() => {
-  const base = getSaturdaysInCycle(props.selectedDate)
+  const base = getCycleDates(props.selectedDate)
   return base.map((c) => ({
     iso: formatDateISO(c.date),
     label: `${String(c.date.getDate()).padStart(2, '0')}/${String(c.date.getMonth() + 1).padStart(2, '0')}`,
